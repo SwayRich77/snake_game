@@ -127,9 +127,10 @@
 
     const tileCount = 20; // 20x20 的格子
     const tileSize = canvas.width / tileCount;
-    const speed = 130; // 刷新速度，毫秒，值越小越快
+    const speed = 190; // 刷新速度，毫秒，值越小越快（放慢便于手机操作）
+    const wallGraceLimit = 3; // 撞墙判定的缓冲帧数，给一点反应时间
 
-    let snake, direction, food, score, gameOver, started, loopId;
+    let snake, direction, food, score, gameOver, started, loopId, wallGrace;
 
     function initGame() {
       snake = [{ x: 10, y: 10 }];
@@ -140,6 +141,7 @@
       scoreSpan.textContent = score;
       messageBox.textContent =
         "点击方向键开始游戏，吃到食物会变长，加分！";
+      wallGrace = 0;
 
       placeFood();
       draw();
@@ -172,8 +174,13 @@
         newHead.y < 0 ||
         newHead.y >= tileCount
       ) {
-        endGame();
-        return;
+        wallGrace += 1;
+        if (wallGrace > wallGraceLimit) {
+          endGame();
+        }
+        return; // 靠墙时停一下，给玩家一个反应窗口
+      } else {
+        wallGrace = 0;
       }
 
       // 撞到自己
